@@ -1,0 +1,4 @@
+/node_modules/
+/nera-vote-plugin-*.zip
+.DS_Store
+*.bak

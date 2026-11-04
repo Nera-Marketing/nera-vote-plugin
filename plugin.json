@@ -1,0 +1,23 @@
+{
+	"name": "Nera – Vote",
+	"slug": "nera-vote-plugin",
+	"version": "0.1.0",
+	"homepage": "https://github.com/Nera-Marketing/nera-vote-plugin",
+	"download_url": "https://github.com/Nera-Marketing/nera-vote-plugin/releases/download/v0.1.0/nera-vote-plugin-0.1.0.zip",
+
+	"author": "Nera",
+	"author_homepage": "https://github.com/Nera-Marketing",
+
+	"requires": "6.0",
+	"tested": "6.8",
+	"requires_php": "7.4",
+	"last_updated": "2026-11-04 00:00:00",
+
+	"upgrade_notice": "Initial release.",
+
+	"sections": {
+		"description": "<p>Time-boxed <strong>Votes</strong> for signed-in members. The team creates a Vote with a list of Options and a start and end date, pastes its shortcode <code>[nera_vote id=\"123\"]</code> into any page or Page Components text field, and members tick the Options they like while the Vote is open. Results are ranked in the admin area with colour bands and progress bars.</p>",
+		"installation": "<p>Install and activate the plugin. Add a Vote under <strong>Votes → Add new Vote</strong>, copy its shortcode from the Shortcode box and paste it where the Vote should appear. <strong>Tools → Nera Vote Demo Seeder</strong> creates demo Votes, Members, Ballots and images for testing, and removes them again.</p>",
+		"changelog": "<p>Release notes: <a href=\"https://github.com/Nera-Marketing/nera-vote-plugin/releases\">GitHub releases</a>.</p>"
+	}
+}
