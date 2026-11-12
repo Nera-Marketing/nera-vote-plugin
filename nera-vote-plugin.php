@@ -95,7 +95,11 @@ require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-cpt.php';
 require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-votes.php';
 require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-results.php';
 require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-assets.php';
+require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-suggestions.php';
+require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-settings.php';
 require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-shortcodes.php';
+require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-page.php';
+require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-account.php';
 require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-rest.php';
 require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-privacy.php';
 require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-activator.php';
@@ -104,15 +108,21 @@ register_activation_hook( __FILE__, array( 'Nera_Vote_Activator', 'activate' ) )
 
 if ( is_admin() ) {
 	require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-admin.php';
+	require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-suggestions-admin.php';
 	require_once NERA_VOTE_PLUGIN_DIR . 'includes/class-demo.php';
 	Nera_Vote_Admin::init();
+	Nera_Vote_Suggestions_Admin::init();
+	Nera_Vote_Settings::init();
 	Nera_Vote_Demo::init();
 }
 
 Nera_Vote_Activator::init();
 Nera_Vote_CPT::init();
 Nera_Vote_Assets::init();
+Nera_Vote_Suggestions::init();
 Nera_Vote_Shortcodes::init();
+Nera_Vote_Page::init();
+Nera_Vote_Account::init();
 Nera_Vote_REST::init();
 Nera_Vote_Privacy::init();
 

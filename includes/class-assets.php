@@ -47,6 +47,19 @@ class Nera_Vote_Assets {
 					'learn'    => __( 'Learn more', 'nera-vote' ),
 					'ballots'  => __( 'Ballots', 'nera-vote' ),
 					'ofVoters' => __( 'of voters', 'nera-vote' ),
+					'left'     => __( '%s left', 'nera-vote' ),
+					'opensIn'  => __( 'Opens in %s', 'nera-vote' ),
+					'ended'    => __( 'Voting has closed', 'nera-vote' ),
+					'opensNow' => __( 'Voting is open now', 'nera-vote' ),
+					'units'    => array(
+						'day'            => __( '%d day', 'nera-vote' ),
+						'days'           => __( '%d days', 'nera-vote' ),
+						'hour'           => __( '%d hour', 'nera-vote' ),
+						'hours'          => __( '%d hours', 'nera-vote' ),
+						'minute'         => __( '%d minute', 'nera-vote' ),
+						'minutes'        => __( '%d minutes', 'nera-vote' ),
+						'lessThanMinute' => __( 'less than a minute', 'nera-vote' ),
+					),
 				),
 			)
 		);

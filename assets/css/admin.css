@@ -42,3 +42,8 @@
 .nera-vote-demo__bar.is-error { background: #d63638; }
 .nera-vote-demo__label { margin: 6px 0 0; color: #50575e; min-height: 20px; }
 .nera-vote-demo__log { background: #1d2327; color: #c3c4c7; padding: 12px; max-height: 260px; overflow: auto; white-space: pre-wrap; font-size: 12px; }
+
+.nera-vote-pill--new { background: #dcdcde; color: #1d2327; }
+.nera-vote-pill--shortlisted { background: #d1f0d9; color: #0a4b1f; }
+.nera-vote-pill--declined { background: #f0d6d6; color: #5e1313; }
+.nera-vote-admin__lock { color: #8a6d00; }

@@ -126,15 +126,57 @@
 			if (e.target === dialog) { closeDialog(dialog); }
 		});
 		dialog.addEventListener('close', function () {
+			dialog.classList.remove('is-open');
 			var back = dialog._opener;
 			if (back && document.contains(back)) { back.focus(); }
 		});
+		wireCancel(dialog);
 		root.appendChild(dialog);
 		return dialog;
 	}
 
+	/* Dialogs fade and slide in and out. The `is-open` class drives the CSS transition;
+	   the real close() waits for it, so Escape, the backdrop and the buttons all animate. */
+	function reducedMotion() {
+		return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	}
+
+	function openDialog(dialog) {
+		clearTimeout(dialog._closeTimer);
+		dialog._closing = false;
+		if (dialog.showModal) { dialog.showModal(); } else { dialog.setAttribute('open', ''); }
+		// Two frames, so the browser paints the closed state before the transition starts.
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () { dialog.classList.add('is-open'); });
+		});
+	}
+
 	function closeDialog(dialog) {
-		if (dialog.close) { dialog.close(); } else { dialog.removeAttribute('open'); }
+		if (!dialog.open || dialog._closing) { return; }
+		var finish = function () {
+			dialog._closing = false;
+			clearTimeout(dialog._closeTimer);
+			if (dialog.close) { dialog.close(); } else { dialog.removeAttribute('open'); }
+		};
+		dialog.classList.remove('is-open');
+		if (reducedMotion()) { finish(); return; }
+		dialog._closing = true;
+		dialog._closeTimer = setTimeout(finish, 260); // a little over the 200ms transition
+	}
+
+	/* Escape cancels a modal dialog: close it through the animation instead. */
+	function wireCancel(dialog) {
+		// Chrome only lets a `cancel` be cancelled in some cases, so take Escape first.
+		dialog.addEventListener('keydown', function (e) {
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				closeDialog(dialog);
+			}
+		});
+		dialog.addEventListener('cancel', function (e) {
+			e.preventDefault();
+			closeDialog(dialog);
+		});
 	}
 
 	function openOption(root, data, optionId, opener) {
@@ -171,7 +213,7 @@
 		}
 		dialog.appendChild(body);
 
-		if (dialog.showModal) { dialog.showModal(); } else { dialog.setAttribute('open', ''); }
+		openDialog(dialog);
 		close.focus();
 	}
 
@@ -197,6 +239,7 @@
 
 	function applyState(root, state) {
 		var ids = state.checked || [];
+		root._ids = ids;
 		root.querySelectorAll('.nera-vote__input').forEach(function (input) {
 			input.checked = ids.indexOf(input.value) !== -1;
 		});
@@ -209,6 +252,96 @@
 		if (state.status && state.status !== root.getAttribute('data-status')) {
 			root.setAttribute('data-status', state.status);
 			if (state.status !== 'open') { location.reload(); }
+		}
+	}
+
+	/* --------------------------------------------------------- deadline */
+
+	function plural(n, one, many) { return (n === 1 ? one : many).replace('%d', String(n)); }
+
+	function spanText(secs) {
+		var d = Math.floor(secs / 86400);
+		var h = Math.floor((secs % 86400) / 3600);
+		var m = Math.floor((secs % 3600) / 60);
+		var u = i18n.units || {};
+		var parts;
+		if (d >= 1) {
+			parts = [plural(d, u.day, u.days)];
+			if (h) { parts.push(plural(h, u.hour, u.hours)); }
+		} else if (h >= 1) {
+			parts = [plural(h, u.hour, u.hours)];
+			if (m) { parts.push(plural(m, u.minute, u.minutes)); }
+		} else if (m >= 1) {
+			parts = [plural(m, u.minute, u.minutes)];
+		} else {
+			parts = [u.lessThanMinute];
+		}
+		return parts.join(' ');
+	}
+
+	function initDeadline(root) {
+		var box = root.querySelector('.nera-vote__deadline');
+		if (!box) { return; }
+		var at = parseInt(box.getAttribute('data-at'), 10) * 1000;
+		var offset = parseInt(box.getAttribute('data-now'), 10) * 1000 - Date.now(); // server clock, not the visitor's
+		var kind = box.getAttribute('data-kind');
+		var out = box.querySelector('.nera-vote__countdown');
+		var voteId = root.getAttribute('data-vote-id');
+		var timer = null;
+
+		function tick() {
+			var left = Math.floor((at - (Date.now() + offset)) / 1000);
+			if (left > 0) {
+				var span = spanText(left);
+				out.textContent = (kind === 'opens' ? i18n.opensIn : i18n.left).replace('%s', span);
+				return;
+			}
+			clearInterval(timer);
+			if (kind === 'opens') {
+				// Reload once so the Options appear; the flag stops a loop if the clocks disagree.
+				var flag = 'nera_vote_opened_' + voteId;
+				try {
+					if (!sessionStorage.getItem(flag)) { sessionStorage.setItem(flag, '1'); location.reload(); return; }
+				} catch (e) { /* storage blocked: leave the text */ }
+				out.textContent = i18n.opensNow;
+				return;
+			}
+			out.textContent = i18n.ended;
+			box.classList.add('is-ended');
+			root.setAttribute('data-status', 'closed');
+			root.querySelectorAll('.nera-vote__input').forEach(function (n) { n.disabled = true; });
+		}
+
+		tick();
+		timer = setInterval(tick, 15000);
+	}
+
+	/* ------------------------------------------------- suggest a bottle */
+
+	function initSuggest() {
+		var dialog = document.getElementById('nera-vote-suggest');
+		document.addEventListener('click', function (e) {
+			var t = e.target instanceof Element ? e.target : null;
+			if (!t) { return; }
+			var open = t.closest('[data-nera-vote-suggest]');
+			if (open && dialog) {
+				dialog._opener = open;
+				openDialog(dialog);
+				var first = dialog.querySelector('input, textarea');
+				if (first) { first.focus(); }
+				return;
+			}
+			var close = t.closest('[data-nera-vote-close]');
+			if (close && close.closest('dialog')) { closeDialog(close.closest('dialog')); }
+		});
+		if (dialog) {
+			dialog.addEventListener('click', function (e) { if (e.target === dialog) { closeDialog(dialog); } });
+			dialog.addEventListener('close', function () {
+				dialog.classList.remove('is-open');
+				var back = dialog._opener;
+				if (back && document.contains(back)) { back.focus(); }
+			});
+			wireCancel(dialog);
 		}
 	}
 
@@ -225,18 +358,22 @@
 			try { data = JSON.parse(script.textContent); } catch (e) { data = {}; }
 		}
 
+		initDeadline(root);
+
 		root.addEventListener('click', function (e) {
-			var btn = e.target instanceof Element ? e.target.closest('.nera-vote__name') : null;
+			var btn = e.target instanceof Element ? e.target.closest('.nera-vote__name, .nera-vote__thumb') : null;
 			if (btn) { openOption(root, data, btn.getAttribute('data-option-id'), btn); }
 		});
 
 		if (status !== 'open' || !loggedIn) { return; }
 
 		// Show remembered ticks straight away; the server state then replaces them.
+		var single = root.getAttribute('data-mode') === 'single';
 		var remembered = readCookie(voteId);
 		root.querySelectorAll('.nera-vote__input').forEach(function (input) {
-			if (remembered.indexOf(input.value) !== -1) { input.checked = true; }
+			if (remembered.indexOf(input.value) !== -1 && (!single || !root.querySelector('.nera-vote__input:checked'))) { input.checked = true; }
 		});
+		root._ids = remembered;
 
 		api('votes/' + voteId).then(function (state) { applyState(root, state); }).catch(function () { /* keep server-rendered state */ });
 
@@ -244,21 +381,29 @@
 			var input = e.target;
 			if (!(input instanceof HTMLInputElement) || !input.classList.contains('nera-vote__input')) { return; }
 			var wanted = input.checked;
-			input.disabled = true;
+			var previous = root._ids || [];
+			// One Option only: a move is a single request, so hold every radio until it lands.
+			var locked = single ? root.querySelectorAll('.nera-vote__input') : [input];
+			locked.forEach(function (n) { n.disabled = true; });
 			api('votes/' + voteId + '/ballot', 'POST', { option_id: input.value, checked: wanted })
 				.then(function (state) {
 					applyState(root, state);
 					notifySaved(sound);
 				})
 				.catch(function (err) {
-					input.checked = !wanted;
+					if (single) {
+						root.querySelectorAll('.nera-vote__input').forEach(function (n) { n.checked = previous.indexOf(n.value) !== -1; });
+					} else {
+						input.checked = !wanted;
+					}
 					notifyError(i18n.error || err.message);
 				})
-				.then(function () { input.disabled = false; });
+				.then(function () { locked.forEach(function (n) { n.disabled = false; }); });
 		});
 	}
 
 	ready(function () {
 		document.querySelectorAll('.nera-vote').forEach(init);
+		initSuggest();
 	});
 })();

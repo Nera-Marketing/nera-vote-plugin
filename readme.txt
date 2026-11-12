@@ -43,5 +43,14 @@ data export and erase tools, and removed when the account is deleted.
 
 == Changelog ==
 
+= Unreleased =
+* Choice mode on each Vote: Members pick one or more Options, or exactly one (radio buttons, can be changed but not withdrawn). Locked once the Vote has Ballots.
+* Suggest a bottle: a Fluent Forms form created on activation, with a weekly limit per Member and no duplicate suggestions.
+* Votes > Suggestions: review suggested bottles grouped by bottle, add them to a Vote's shortlist or decline them.
+* Vote page created on activation, with the [nera_vote_page] shortcode (current Vote, Suggest a bottle button, rules) and Votes > Settings.
+* Vote section: bottle thumbnails, a voting deadline with live countdown and a Suggest a bottle button.
+* My account tab "My suggestions and votes".
+* Suggestions are included in the personal data export and erase tools.
+
 = 0.1.0 =
 * Initial release.

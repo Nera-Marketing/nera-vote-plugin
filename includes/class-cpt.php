@@ -16,6 +16,7 @@ class Nera_Vote_CPT {
 	const META_SHOW_RESULTS = '_nera_vote_show_results';
 	const META_PLAY_SOUND   = '_nera_vote_play_sound';
 	const META_OPTIONS      = '_nera_vote_options';
+	const META_CHOICE_MODE  = '_nera_vote_choice_mode';
 
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register' ) );
@@ -88,12 +89,24 @@ class Nera_Vote_CPT {
 		return 'while_open' === $mode ? 'while_open' : 'after_close';
 	}
 
+	/** multiple (default, also for a Vote saved before the setting existed) | single */
+	public static function choice_mode( $vote_id ) {
+		return 'single' === get_post_meta( $vote_id, self::META_CHOICE_MODE, true ) ? 'single' : 'multiple';
+	}
+
+	/** The Choice mode is locked once any Member has cast a Ballot. */
+	public static function choice_mode_locked( $vote_id ) {
+		return Nera_Vote_Votes::total( $vote_id ) > 0;
+	}
+
 	public static function play_sound( $vote_id ) {
 		return 'no' !== get_post_meta( $vote_id, self::META_PLAY_SOUND, true );
 	}
 
 	/**
-	 * @return array<int,array{id:string,name:string,image_id:int,description:string,link:string,hidden:bool}>
+	 * `source` is the normalised bottle and brand of the Suggestion an Option came from ('' for typed Options).
+	 *
+	 * @return array<int,array{id:string,name:string,image_id:int,description:string,link:string,hidden:bool,source:string}>
 	 */
 	public static function options( $vote_id ) {
 		$raw = get_post_meta( $vote_id, self::META_OPTIONS, true );
@@ -112,6 +125,7 @@ class Nera_Vote_CPT {
 				'description' => isset( $opt['description'] ) ? (string) $opt['description'] : '',
 				'link'        => isset( $opt['link'] ) ? (string) $opt['link'] : '',
 				'hidden'      => ! empty( $opt['hidden'] ),
+				'source'      => isset( $opt['source'] ) ? (string) $opt['source'] : '',
 			);
 		}
 		return $out;

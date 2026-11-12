@@ -93,7 +93,7 @@ class Nera_Vote_Demo {
 		?>
 		<div class="wrap nera-vote-demo">
 			<h1><?php esc_html_e( 'Nera Vote Demo Seeder', 'nera-vote' ); ?></h1>
-			<p class="description"><?php esc_html_e( 'Creates three demo Votes (open, scheduled and closed) with 3 to 4 Options each, demo Members and random Ballots so you can see the front end and the Results screen. Each Option gets a generated image so the popup can be checked. Remove deletes only what this tool created, images included.', 'nera-vote' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Creates four demo Votes (open, scheduled, closed and an open one where Members pick a single Option) with 3 to 4 Options each, demo Members and random Ballots so you can see the front end and the Results screen. Each Option gets a generated image so the popup can be checked. Remove deletes only what this tool created, images included.', 'nera-vote' ); ?></p>
 
 			<?php if ( ! self::creation_allowed() ) : ?>
 				<div class="notice notice-warning inline"><p><?php esc_html_e( 'This looks like a production site, so creating demo data is switched off. You can still remove demo data. To allow creating it, define NERA_VOTE_ALLOW_DEMO as true.', 'nera-vote' ); ?></p></div>
@@ -463,6 +463,14 @@ class Nera_Vote_Demo {
 				'show'    => 'after_close',
 				'options' => array_slice( self::bottles(), 2, 3 ),
 			),
+			array(
+				'title'   => 'Demo: One bottle only',
+				'start'   => $now - $day,
+				'end'     => $now + 4 * $day,
+				'show'    => 'while_open',
+				'mode'    => 'single',
+				'options' => array_slice( self::bottles(), 1, 4 ),
+			),
 		);
 	}
 
@@ -496,6 +504,7 @@ class Nera_Vote_Demo {
 		update_post_meta( $id, Nera_Vote_CPT::META_END, (int) $def['end'] );
 		update_post_meta( $id, Nera_Vote_CPT::META_SHOW_RESULTS, $def['show'] );
 		update_post_meta( $id, Nera_Vote_CPT::META_PLAY_SOUND, 'yes' );
+		update_post_meta( $id, Nera_Vote_CPT::META_CHOICE_MODE, isset( $def['mode'] ) && 'single' === $def['mode'] ? 'single' : 'multiple' );
 		update_post_meta( $id, Nera_Vote_CPT::META_OPTIONS, wp_slash( $options ) );
 		update_post_meta( $id, self::VOTE_META, time() );
 		return (int) $id;
@@ -689,7 +698,7 @@ class Nera_Vote_Demo {
 				if ( wp_rand( 1, 100 ) > 80 ) {
 					continue; // Not everyone votes.
 				}
-				$picks = self::weighted_pick( $weights, wp_rand( 1, min( 3, count( $options ) ) ) );
+				$picks = self::weighted_pick( $weights, 'single' === Nera_Vote_CPT::choice_mode( $vote_id ) ? 1 : wp_rand( 1, min( 3, count( $options ) ) ) );
 				foreach ( $picks as $option_id ) {
 					$when = $from < $to ? wp_rand( $from, $to ) : $to;
 					if ( Nera_Vote_Votes::add( $vote_id, $option_id, $uid, gmdate( 'Y-m-d H:i:s', $when ) ) ) {

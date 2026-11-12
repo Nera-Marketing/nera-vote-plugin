@@ -70,6 +70,7 @@ class Nera_Vote_REST {
 		$mine   = array_values( array_intersect( Nera_Vote_Votes::user_option_ids( $vote_id, $user_id ), $option_ids ) );
 		$result = array(
 			'status'  => Nera_Vote_CPT::status( $vote_id ),
+			'mode'    => Nera_Vote_CPT::choice_mode( $vote_id ),
 			'checked' => $mine,
 			'results' => null,
 		);
@@ -110,8 +111,19 @@ class Nera_Vote_REST {
 		}
 
 		$user_id = get_current_user_id();
+		$single  = ( 'single' === Nera_Vote_CPT::choice_mode( $vote_id ) );
 		if ( $request['checked'] ) {
+			if ( $single ) {
+				// One Ballot only: choosing another Option moves it, in this one request.
+				foreach ( Nera_Vote_Votes::user_option_ids( $vote_id, $user_id ) as $other ) {
+					if ( $other !== $option_id ) {
+						Nera_Vote_Votes::remove( $vote_id, $other, $user_id );
+					}
+				}
+			}
 			Nera_Vote_Votes::add( $vote_id, $option_id, $user_id );
+		} elseif ( $single ) {
+			return new WP_Error( 'nera_vote_single_no_withdraw', __( 'In this Vote you can change your choice but not withdraw it.', 'nera-vote' ), array( 'status' => 409 ) );
 		} else {
 			Nera_Vote_Votes::remove( $vote_id, $option_id, $user_id );
 		}

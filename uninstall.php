@@ -34,3 +34,9 @@ $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'nera_vote_ballots' ); /
 
 delete_option( 'nera_vote_db_version' );
 delete_option( 'nera_vote_demo_hidden' );
+delete_option( 'nera_vote_suggest_limit' );
+delete_option( 'nera_vote_rules_text' );
+delete_option( 'nera_vote_endpoint_version' );
+// The Suggest a bottle form, its entries and the Vote page are kept: they hold Members' words and a live page.
+delete_option( 'nera_vote_form_id' );
+delete_option( 'nera_vote_page_id' );

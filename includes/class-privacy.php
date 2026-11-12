@@ -13,11 +13,12 @@ class Nera_Vote_Privacy {
 		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'register_exporter' ) );
 		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'register_eraser' ) );
 		add_action( 'delete_user', array( 'Nera_Vote_Votes', 'delete_for_user' ) );
+		add_action( 'delete_user', array( 'Nera_Vote_Suggestions', 'erase_for_user' ) );
 	}
 
 	public static function register_exporter( $exporters ) {
 		$exporters['nera-vote'] = array(
-			'exporter_friendly_name' => __( 'Nera – Vote ballots', 'nera-vote' ),
+			'exporter_friendly_name' => __( 'Nera – Vote ballots and suggestions', 'nera-vote' ),
 			'callback'               => array( __CLASS__, 'export' ),
 		);
 		return $exporters;
@@ -25,7 +26,7 @@ class Nera_Vote_Privacy {
 
 	public static function register_eraser( $erasers ) {
 		$erasers['nera-vote'] = array(
-			'eraser_friendly_name' => __( 'Nera – Vote ballots', 'nera-vote' ),
+			'eraser_friendly_name' => __( 'Nera – Vote ballots and suggestions', 'nera-vote' ),
 			'callback'             => array( __CLASS__, 'erase' ),
 		);
 		return $erasers;
@@ -55,12 +56,27 @@ class Nera_Vote_Privacy {
 				);
 			}
 		}
+		if ( $user ) {
+			foreach ( Nera_Vote_Suggestions::export_for_user( $user->ID ) as $row ) {
+				$data[] = array(
+					'group_id'    => 'nera-vote-suggestions',
+					'group_label' => __( 'Vote suggestions', 'nera-vote' ),
+					'item_id'     => 'nera-vote-suggestion-' . $row['id'],
+					'data'        => array(
+						array( 'name' => __( 'Bottle', 'nera-vote' ), 'value' => $row['bottle'] ),
+						array( 'name' => __( 'Brand', 'nera-vote' ), 'value' => $row['brand'] ),
+						array( 'name' => __( 'Note', 'nera-vote' ), 'value' => $row['note'] ),
+						array( 'name' => __( 'Date', 'nera-vote' ), 'value' => wp_date( 'Y-m-d H:i', $row['time'] ) ),
+					),
+				);
+			}
+		}
 		return array( 'data' => $data, 'done' => true );
 	}
 
 	public static function erase( $email ) {
 		$user    = get_user_by( 'email', $email );
-		$removed = $user ? Nera_Vote_Votes::delete_for_user( $user->ID ) : 0;
+		$removed = $user ? Nera_Vote_Votes::delete_for_user( $user->ID ) + Nera_Vote_Suggestions::erase_for_user( $user->ID ) : 0;
 		return array(
 			'items_removed'  => $removed > 0,
 			'items_retained' => false,

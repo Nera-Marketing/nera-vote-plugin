@@ -102,6 +102,21 @@ class Nera_Vote_Admin {
 				</td>
 			</tr>
 			<tr>
+				<th><label for="nera_vote_choice_mode"><?php esc_html_e( 'Choice mode', 'nera-vote' ); ?></label></th>
+				<td>
+					<?php $mode_locked = Nera_Vote_CPT::choice_mode_locked( $id ); ?>
+					<select id="nera_vote_choice_mode" name="nera_vote_choice_mode"<?php echo $mode_locked ? ' disabled' : ''; ?>>
+						<option value="multiple" <?php selected( Nera_Vote_CPT::choice_mode( $id ), 'multiple' ); ?>><?php esc_html_e( 'Members can pick one or more Options', 'nera-vote' ); ?></option>
+						<option value="single" <?php selected( Nera_Vote_CPT::choice_mode( $id ), 'single' ); ?>><?php esc_html_e( 'Members can pick one Option only', 'nera-vote' ); ?></option>
+					</select>
+					<?php if ( $mode_locked ) : ?>
+						<p class="description nera-vote-admin__lock"><?php esc_html_e( 'The choice mode can\'t change once members have voted.', 'nera-vote' ); ?></p>
+					<?php else : ?>
+						<p class="description"><?php esc_html_e( 'With one Option only, Members see radio buttons and choosing another Option moves their vote. They can change it but not withdraw it while the Vote is open.', 'nera-vote' ); ?></p>
+					<?php endif; ?>
+				</td>
+			</tr>
+			<tr>
 				<th><label for="nera_vote_play_sound"><?php esc_html_e( 'Play a sound when saved', 'nera-vote' ); ?></label></th>
 				<td>
 					<select id="nera_vote_play_sound" name="nera_vote_play_sound">
@@ -291,6 +306,13 @@ class Nera_Vote_Admin {
 		$sound = isset( $_POST['nera_vote_play_sound'] ) ? sanitize_key( wp_unslash( $_POST['nera_vote_play_sound'] ) ) : 'yes';
 		update_post_meta( $post_id, Nera_Vote_CPT::META_PLAY_SOUND, 'no' === $sound ? 'no' : 'yes' );
 
+		// The Choice mode is locked once any Member has voted. Judged from what is stored, so a
+		// crafted request cannot change it.
+		if ( ! Nera_Vote_CPT::choice_mode_locked( $post_id ) && isset( $_POST['nera_vote_choice_mode'] ) ) {
+			$choice = sanitize_key( wp_unslash( $_POST['nera_vote_choice_mode'] ) );
+			update_post_meta( $post_id, Nera_Vote_CPT::META_CHOICE_MODE, 'single' === $choice ? 'single' : 'multiple' );
+		}
+
 		// Options are locked while the Vote is Closed (decided from what is stored, before this save).
 		$was_closed = ( 'closed' === Nera_Vote_CPT::status( $post_id ) && Nera_Vote_CPT::options( $post_id ) );
 
@@ -339,6 +361,7 @@ class Nera_Vote_Admin {
 				'description' => isset( $row['description'] ) ? sanitize_textarea_field( $row['description'] ) : '',
 				'link'        => $link,
 				'hidden'      => ! empty( $row['hidden'] ),
+				'source'      => isset( $existing[ $oid ] ) ? $existing[ $oid ]['source'] : '',
 			);
 		}
 

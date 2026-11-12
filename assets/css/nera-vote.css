@@ -10,7 +10,17 @@
 	margin: 0 0 2rem;
 }
 
-.nera-vote__title { margin: 0 0 .75rem; font-size: 1.5rem; line-height: 1.2; }
+.nera-vote__title { margin: 0 0 .5rem; font-size: 1.5rem; line-height: 1.2; }
+
+/* Header: title and deadline left, Suggest a bottle right; the button wraps under on narrow screens. */
+.nera-vote__head {
+	display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+	gap: .75rem 1.25rem; margin: 0 0 1rem;
+}
+.nera-vote__head-main { flex: 1 1 18rem; min-width: 0; }
+.nera-vote__head-main > :last-child { margin-bottom: 0; }
+.nera-vote__head-action { flex: 0 0 auto; }
+.nera-vote__head-action > .nera-vote__notice { margin: 0; }
 .nera-vote__hint, .nera-vote__notice { margin: 0 0 1rem; color: var(--nv-muted); }
 .nera-vote__notice a { color: var(--nv-ink); text-decoration: underline; }
 .nera-vote__notice--editor { border: 1px dashed var(--nv-line); padding: .5rem .75rem; }
@@ -68,6 +78,15 @@
 	border: 1px solid var(--nv-ink); background: var(--nv-bg); color: var(--nv-ink);
 }
 .nera-vote__dialog::backdrop { background: rgba(0, 0, 0, .55); }
+
+/* Open and close animation, driven by the `is-open` class set in nera-vote.js. */
+.nera-vote__dialog {
+	opacity: 0; transform: translateY(14px) scale(.97);
+	transition: opacity .2s ease, transform .2s cubic-bezier(.2, .8, .2, 1);
+}
+.nera-vote__dialog.is-open { opacity: 1; transform: none; }
+.nera-vote__dialog::backdrop { opacity: 0; transition: opacity .2s ease; }
+.nera-vote__dialog.is-open::backdrop { opacity: 1; }
 .nera-vote__dialog-close {
 	position: absolute; top: .5rem; right: .5rem; z-index: 1; margin: 0; padding: 0;
 	width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center;
@@ -106,4 +125,96 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.nera-vote-bar__fill, .nera-vote-toast { transition: none; }
+	.nera-vote__dialog, .nera-vote__dialog::backdrop { transition: none; }
+}
+
+/* ---------------------------------------------------------------- thumbnails */
+
+.nera-vote__item { grid-template-columns: auto 56px 1fr; }
+.nera-vote--closed .nera-vote__item { grid-template-columns: 56px 1fr; }
+.nera-vote__thumb {
+	appearance: none; margin: 0; padding: 0; cursor: pointer;
+	width: 56px; height: 56px; box-sizing: border-box; overflow: hidden;
+	border: 1px solid var(--nv-line); background: var(--nv-line); color: var(--nv-ink);
+	display: flex; align-items: center; justify-content: center;
+	font: inherit; font-weight: 700; font-size: 1.25rem; line-height: 1;
+}
+.nera-vote__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.nera-vote__thumb:hover, .nera-vote__thumb:focus-visible { border-color: var(--nv-ink); }
+.nera-vote__thumb--empty { background: transparent; }
+
+/* One option only: radio buttons. */
+.nera-vote--single .nera-vote__tick { border-radius: 50%; }
+.nera-vote--single .nera-vote__input:checked + .nera-vote__tick::after {
+	width: .6rem; height: .6rem; margin: 0; border: 0; border-radius: 50%;
+	background: var(--nv-on-accent); transform: none;
+}
+
+/* ------------------------------------------------------------------ deadline */
+
+.nera-vote__deadline {
+	display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .75rem;
+	margin: 0 0 1rem; color: var(--nv-ink);
+}
+.nera-vote__deadline-date { font-weight: 700; }
+.nera-vote__countdown { color: var(--nv-muted); }
+.nera-vote__deadline.is-ended .nera-vote__countdown { font-weight: 600; color: var(--nv-ink); }
+
+/* ------------------------------------------------------------ suggest button */
+
+.nera-vote__suggest { margin: 1.25rem 0 0; }
+.nera-vote__cta {
+	display: inline-block; appearance: none; margin: 0; cursor: pointer; text-decoration: none;
+	padding: .65rem 1.1rem; font: inherit; font-weight: 600; line-height: 1.2;
+	border: 1px solid var(--nv-ink); background: var(--nv-ink); color: var(--nv-bg);
+}
+.nera-vote__cta:hover, .nera-vote__cta:focus-visible { background: var(--nv-bg); color: var(--nv-ink); }
+.nera-vote__suggest-dialog { max-width: min(30rem, calc(100vw - 2rem)); }
+.nera-vote__suggest-dialog .fluentform { margin-top: .75rem; }
+.nera-vote__suggest-dialog .ff-el-group { margin-bottom: .9rem; }
+.nera-vote__suggest-dialog .ff-el-input--label label { display: block; margin-bottom: .3rem; font-weight: 600; }
+.nera-vote__suggest-dialog .ff-el-form-control {
+	display: block; width: 100%; box-sizing: border-box; padding: .6rem .7rem;
+	font: inherit; color: var(--nv-ink); background: var(--nv-bg); border: 1px solid var(--nv-ink); border-radius: 0;
+}
+.nera-vote__suggest-dialog .ff-btn-submit {
+	appearance: none; cursor: pointer; padding: .65rem 1.1rem; font: inherit; font-weight: 600;
+	border: 1px solid var(--nv-ink); border-radius: 0; background: var(--nv-ink); color: var(--nv-bg);
+}
+.nera-vote__suggest-dialog .ff-message-success { margin: 0; padding: .75rem 0; color: var(--nv-ink); }
+.nera-vote__suggest-dialog .error.text-danger, .nera-vote__suggest-dialog .ff-el-is-error .text-danger { color: #b32d2e; font-size: .875rem; }
+
+/* --------------------------------------------------------------- Vote page */
+
+.nera-vote-rules { margin: 2rem 0 0; padding-top: 1.25rem; border-top: 1px solid var(--color-gray-200, #d9d9d9); }
+.nera-vote-rules__title { margin: 0 0 .5rem; font-size: 1.125rem; }
+.nera-vote-rules__list { margin: 0; padding-left: 1.2rem; list-style: disc; color: var(--color-text-secondary, #5b5b5b); }
+.nera-vote-rules__list li { margin: 0 0 .35rem; }
+
+/* --------------------------------------------------------- My account tab */
+
+.nera-vote-account__title { margin: 1.5rem 0 .6rem; font-size: 1.125rem; }
+.nera-vote-account__title:first-child { margin-top: 0; }
+.nera-vote-account__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--color-gray-200, #d9d9d9); }
+.nera-vote-account__item {
+	display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .6rem;
+	padding: .7rem 0; border-bottom: 1px solid var(--color-gray-200, #d9d9d9);
+}
+.nera-vote-account__brand, .nera-vote-account__date, .nera-vote-account__note { color: var(--color-text-secondary, #5b5b5b); font-size: .9rem; }
+.nera-vote-account__date { margin-left: auto; }
+.nera-vote-account__empty { color: var(--color-text-secondary, #5b5b5b); }
+.nera-vote-pill {
+	display: inline-block; padding: .1rem .55rem; font-size: .75rem; font-weight: 600; line-height: 1.5;
+	border: 1px solid currentColor; border-radius: 99px; color: var(--color-text-secondary, #5b5b5b);
+}
+.nera-vote-pill--shortlisted, .nera-vote-pill--open { color: #1a7f37; }
+.nera-vote-pill--declined, .nera-vote-pill--closed { color: #8a8a8a; }
+.nera-vote-pill--scheduled { color: #8a6d00; }
+
+@media (max-width: 640px) {
+	.nera-vote__item { column-gap: .7rem; }
+	.nera-vote__head-action { flex: 1 1 100%; }
+	.nera-vote__head-action .nera-vote__cta { display: block; width: 100%; text-align: center; box-sizing: border-box; }
+	.nera-vote-account__date { margin-left: 0; flex-basis: 100%; }
+	.nera-vote__suggest-dialog { max-width: calc(100vw - 1.5rem); }
 }
