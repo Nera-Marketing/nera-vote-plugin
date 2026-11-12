@@ -31,6 +31,10 @@ A setting on each Vote: **Multiple** lets a Member tick any number of Options, *
 A Vote is **Scheduled** before its start date, **Open** from its start to its end date, and **Closed** after. A Scheduled Vote shows Members only when it opens, not its Options. While Open a Member can tick and untick Options freely, and an unticked Option no longer counts. Once Closed every Ballot is locked, the results are final, and the Options remain visible read-only.
 _Avoid_: Upcoming, active, finished, ended
 
+**Latest open Vote**:
+The Open Vote that closes soonest, which is also the Vote the Vote page shows first. `[nera_vote latest="open"]` prints it, so a page such as the home page always shows the Vote that is open now without anyone pasting a Vote ID. With no Open Vote it prints nothing, or with `fallback="closed"` the Vote that closed most recently. Worked out from the clock on each request; a full-page cache can show a stale Vote until the cache is cleared after a Vote opens or closes.
+_Avoid_: Current poll, newest Vote (the newest by date is not necessarily the open one)
+
 **Results**:
 A Vote's Options ranked from most to fewest Ballots. The team can always see them. Whether Members can see them, and whether that is already while the Vote is Open or only once it is Closed, is a setting on each Vote.
 _Avoid_: Tally, scoreboard, leaderboard

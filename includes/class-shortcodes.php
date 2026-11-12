@@ -13,6 +13,9 @@ class Nera_Vote_Shortcodes {
 	/** The suggest dialog (with the Fluent Forms form in it) is printed once per request. */
 	private static $suggest_dialog_printed = false;
 
+	/** How many times each Vote was printed in this request (vote ID => count). */
+	private static $printed = array();
+
 	public static function init() {
 		add_shortcode( 'nera_vote', array( __CLASS__, 'render' ) );
 	}
@@ -20,15 +23,33 @@ class Nera_Vote_Shortcodes {
 	public static function render( $atts ) {
 		$atts    = shortcode_atts(
 			array(
-				'id'      => 0,
-				'title'   => 'yes',
-				'suggest' => 'yes',
+				'id'       => 0,
+				'title'    => 'yes',
+				'suggest'  => 'yes',
+				'latest'   => '',
+				'fallback' => '',
 			),
 			$atts,
 			'nera_vote'
 		);
-		$vote_id = (int) $atts['id'];
-		$post    = $vote_id ? get_post( $vote_id ) : null;
+		$latest   = strtolower( trim( (string) $atts['latest'] ) );
+		$fallback = strtolower( trim( (string) $atts['fallback'] ) );
+
+		if ( 'open' === $latest ) {
+			// latest="open": the Vote that is open right now, the same one the Vote page shows first.
+			// Nothing open: print nothing (visitors see no empty box), unless fallback="closed" asks for
+			// the Vote that closed most recently.
+			$vote_id = Nera_Vote_Page::latest_open_vote_id();
+			if ( ! $vote_id && 'closed' === $fallback ) {
+				$vote_id = Nera_Vote_Page::last_closed_vote_id();
+			}
+			if ( ! $vote_id ) {
+				return '';
+			}
+		} else {
+			$vote_id = (int) $atts['id'];
+		}
+		$post = $vote_id ? get_post( $vote_id ) : null;
 
 		if ( ! $post || Nera_Vote_CPT::POST_TYPE !== $post->post_type ) {
 			return self::editor_notice( __( 'Nera – Vote: no Vote with that ID.', 'nera-vote' ) );
@@ -45,6 +66,12 @@ class Nera_Vote_Shortcodes {
 		$options   = Nera_Vote_CPT::visible_options( $vote_id );
 		$title     = 'no' !== strtolower( (string) $atts['title'] ) ? get_the_title( $post ) : '';
 		$dom_id    = 'nera-vote-' . $vote_id;
+		// The same Vote can appear twice on one page (for example latest="open" plus the Vote page):
+		// keep element IDs and radio group names unique.
+		self::$printed[ $vote_id ] = isset( self::$printed[ $vote_id ] ) ? self::$printed[ $vote_id ] + 1 : 1;
+		if ( self::$printed[ $vote_id ] > 1 ) {
+			$dom_id .= '-' . self::$printed[ $vote_id ];
+		}
 		$mode      = Nera_Vote_CPT::choice_mode( $vote_id );
 		$single    = ( 'single' === $mode );
 		$suggest   = ( 'no' !== strtolower( (string) $atts['suggest'] ) );

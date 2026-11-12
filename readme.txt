@@ -28,6 +28,7 @@ bands and progress bars.
 
 = Front end =
 * Shortcode `[nera_vote id="123"]` (add `title="no"` to hide the Vote title).
+* Shortcode `[nera_vote latest="open"]` shows the Vote that is open now, the same one the Vote page shows first, and changes by itself when the next Vote opens. With no open Vote it prints nothing; add `fallback="closed"` to show the Vote that closed most recently instead. Combine with `title="no"` or `suggest="no"` as for an ID.
 * Scheduled: only the opening date. Open: tickable list. Closed: read-only list, with Results when the Vote allows it.
 * Toast and chime reuse the Nera theme's add-to-cart feedback when present, with a built-in fallback.
 
@@ -44,6 +45,7 @@ data export and erase tools, and removed when the account is deleted.
 == Changelog ==
 
 = Unreleased =
+* Shortcode `[nera_vote latest="open"]` (optional `fallback="closed"`): the Vote that is open now, so a home page section follows the open Vote without a hard-coded ID.
 * Choice mode on each Vote: Members pick one or more Options, or exactly one (radio buttons, can be changed but not withdrawn). Locked once the Vote has Ballots.
 * Suggest a bottle: a Fluent Forms form created on activation, with a weekly limit per Member and no duplicate suggestions.
 * Votes > Suggestions: review suggested bottles grouped by bottle, add them to a Vote's shortlist or decline them.

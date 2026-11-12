@@ -91,6 +91,42 @@ class Nera_Vote_Page {
 	 * last to close.
 	 */
 	public static function current_vote_id() {
+		$groups = self::votes_by_status();
+		if ( $groups['open'] ) {
+			return (int) key( $groups['open'] );
+		}
+		if ( $groups['scheduled'] ) {
+			return (int) key( $groups['scheduled'] );
+		}
+		if ( $groups['closed'] ) {
+			return (int) key( $groups['closed'] );
+		}
+		return 0;
+	}
+
+	/**
+	 * The latest open Vote: the open Vote the Vote page shows first (the one closing soonest), so
+	 * [nera_vote latest="open"] and the Vote page always show the same Vote. 0 when none is open.
+	 */
+	public static function latest_open_vote_id() {
+		$groups = self::votes_by_status();
+		return $groups['open'] ? (int) key( $groups['open'] ) : 0;
+	}
+
+	/** The Vote that closed most recently. 0 when no Vote has closed. */
+	public static function last_closed_vote_id() {
+		$groups = self::votes_by_status();
+		return $groups['closed'] ? (int) key( $groups['closed'] ) : 0;
+	}
+
+	/**
+	 * Published Votes grouped by status, each group already sorted the way the Vote page picks from
+	 * it: open (closing soonest first), scheduled (opening soonest first), closed (closed last first).
+	 * Status is worked out from the clock on every request, never stored.
+	 *
+	 * @return array{open: array<int,int>, scheduled: array<int,int>, closed: array<int,int>}
+	 */
+	private static function votes_by_status() {
 		$ids = get_posts(
 			array(
 				'post_type'      => Nera_Vote_CPT::POST_TYPE,
@@ -105,8 +141,8 @@ class Nera_Vote_Page {
 		foreach ( $ids as $id ) {
 			switch ( Nera_Vote_CPT::status( $id ) ) {
 				case 'open':
-					$end             = Nera_Vote_CPT::end( $id );
-					$open[ $id ]     = $end ? $end : PHP_INT_MAX;
+					$end         = Nera_Vote_CPT::end( $id );
+					$open[ $id ] = $end ? $end : PHP_INT_MAX;
 					break;
 				case 'scheduled':
 					$scheduled[ $id ] = Nera_Vote_CPT::start( $id );
@@ -115,19 +151,14 @@ class Nera_Vote_Page {
 					$closed[ $id ] = Nera_Vote_CPT::end( $id );
 			}
 		}
-		if ( $open ) {
-			asort( $open );
-			return (int) key( $open );
-		}
-		if ( $scheduled ) {
-			asort( $scheduled );
-			return (int) key( $scheduled );
-		}
-		if ( $closed ) {
-			arsort( $closed );
-			return (int) key( $closed );
-		}
-		return 0;
+		asort( $open );
+		asort( $scheduled );
+		arsort( $closed );
+		return array(
+			'open'      => $open,
+			'scheduled' => $scheduled,
+			'closed'    => $closed,
+		);
 	}
 
 	public static function render() {
