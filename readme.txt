@@ -3,7 +3,7 @@ Contributors: Nera
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 License: GPLv2 or later
 
 Time-boxed votes for signed-in members, with ranked results for the team.
