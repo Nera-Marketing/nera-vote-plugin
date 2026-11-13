@@ -36,7 +36,7 @@ class Nera_Vote_CPT {
 					'all_items'     => __( 'All Votes', 'nera-vote' ),
 					'search_items'  => __( 'Search Votes', 'nera-vote' ),
 					'not_found'     => __( 'No Votes found.', 'nera-vote' ),
-					'menu_name'     => __( 'Votes', 'nera-vote' ),
+					'menu_name'     => __( 'Nera Vote', 'nera-vote' ),
 				),
 				'public'          => false,
 				'show_ui'         => true,
