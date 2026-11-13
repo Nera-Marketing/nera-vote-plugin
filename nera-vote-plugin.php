@@ -3,7 +3,7 @@
  * Plugin Name: Nera – Vote
  * Plugin URI: https://github.com/Nera-Marketing/nera-vote-plugin
  * Description: Time-boxed votes for members. The team creates a Vote with a list of Options and a start and end date, pastes its shortcode into any page, and signed-in members tick the Options they like while it is open. Results are ranked in the admin area.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Nera
  * Text Domain: nera-vote
  * Domain Path: /languages
@@ -17,7 +17,7 @@ use YahnisElsts\PluginUpdateChecker\v5p5\Vcs\GitHubApi;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NERA_VOTE_VERSION', '1.0.0' );
+define( 'NERA_VOTE_VERSION', '1.0.1' );
 define( 'NERA_VOTE_PLUGIN_FILE', __FILE__ );
 define( 'NERA_VOTE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NERA_VOTE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
