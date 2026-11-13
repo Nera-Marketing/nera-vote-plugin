@@ -2,3 +2,14 @@
 /nera-vote-plugin-*.zip
 .DS_Store
 *.bak
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+.cursor/
+.claude/
+*.log
+.env
+.env.*
+/*.zip
+.release-tmp/
